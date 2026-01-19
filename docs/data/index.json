@@ -1,29 +1,33 @@
 {
     "team": [
         {
-            "name": "Team Member Name 1",
-            "email": "email@eng.pdn.ac.lk",
-            "eNumber": "E/yy/xxx"
+            "name": "Jananga T.G.C.",
+            "email": "e20158@eng.pdn.ac.lk",
+            "eNumber": "E/20/158"
         },
         {
-            "name": "Team Member Name 2",
-            "email": "email@eng.pdn.ac.lk",
-            "eNumber": "E/yy/xxx"
+            "name": "Prasadinie H.A.M.T",
+            "email": "e20300@eng.pdn.ac.lk",
+            "eNumber": "E/20/300"
         },
         {
-            "name": "Team Member Name 3",
-            "email": "email@eng.pdn.ac.lk",
-            "eNumber": "E/yy/xxx"
+            "name": "Malshan P.G.P.",
+            "email": "e20244@eng.pdn.ac.lk",
+            "eNumber": "E/20/244"
         }
     ],
     "supervisors": [
         {
-            "name": "Dr. Supervisor 1",
-            "email": "email@eng.pdn.ac.lk"
+            "name": "Dr. Damayanthi Herath",
+            "email": "damayanthiherath@eng.pdn.ac.lk"
         },
         {
-            "name": "Dr. Supervisor 2",
-            "email": "email@eng.pdn.ac.lk"
+            "name": "Dr. Rajith Vidanaarachchi",
+            "email": "rajith.v@unimelb.edu.au"
+        },
+        {
+            "name": "Dr. Vijini Mallawaarachchi",
+            "email": "vijini.mallawaarachchi@flinders.edu.au"
         }
     ],
     "media": [
