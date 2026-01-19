@@ -4,7 +4,7 @@ permalink: index.html
 
 # Please update this with your repository name and title
 repository-name: eYY-4yp-metagenomics
-title:
+title: Data Driven Methods For Comparative Metagenomics
 ---
 
 [comment]: # "This is the standard layout for the project, but you can clean this and use your own template"
@@ -14,13 +14,14 @@ title:
 #### Team
 
 - E/20/158, Jananga T.G.C., [email](mailto:e20158@eng.pdn.ac.lk)
-- eNumber, Name, [email](mailto:name@email.com)
-- eNumber, Name, [email](mailto:name@email.com)
+- E/20/300, Prasadinie H.A.M.T, [email](mailto:e20300@eng.pdn.ac.lk)
+- E/20/244, Malshan P.G.P, [email](mailto:e20244@eng.pdn.ac.lk)
 
 #### Supervisors
 
-- Name, [email](mailto:name@eng.pdn.ac.lk)
-- Name, [email](mailto:name@eng.pdn.ac.lk)
+- Dr.Damayanthi Herath, [email](mailto:damayanthiherath@eng.pdn.ac.lk)
+- Dr.Rajith Vidanaarachchi, [email](mailto:rajith.v@unimelb.edu.au)
+-  Dr.Vijini Mallawaarachchi, [email](mailto:vijini.mallawaarachchi@flinders.edu.au)
 
 #### Table of content
 
@@ -68,7 +69,7 @@ This is a sample image, to show how to add images to your page. To learn more op
 
 [//]: # ( NOTE: EDIT THIS LINKS WITH YOUR REPO DETAILS )
 
-- [Project Repository](https://github.com/cepdnaclk/repository-name)
+- [Project Repository]([https://github.com/cepdnaclk/repository-name](https://github.com/cepdnaclk/e20-4yp-metagenomics.git))
 - [Project Page](https://cepdnaclk.github.io/repository-name)
 - [Department of Computer Engineering](http://www.ce.pdn.ac.lk/)
 - [University of Peradeniya](https://eng.pdn.ac.lk/)
