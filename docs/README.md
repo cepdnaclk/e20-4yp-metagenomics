@@ -9,7 +9,7 @@ title: Data Driven Methods For Comparative Metagenomics
 
 [comment]: # "This is the standard layout for the project, but you can clean this and use your own template"
 
-# Project Title
+# Data Driven Methods For Comparative Metagenomics
 
 #### Team
 
