@@ -3,7 +3,7 @@ layout: home
 permalink: index.html
 
 # Please update this with your repository name and title
-repository-name: eYY-4yp-project-template
+repository-name: eYY-4yp-metagenomics
 title:
 ---
 
@@ -13,7 +13,7 @@ title:
 
 #### Team
 
-- eNumber, Name, [email](mailto:name@email.com)
+- E/20/158, Jananga T.G.C., [email](mailto:e20158@eng.pdn.ac.lk)
 - eNumber, Name, [email](mailto:name@email.com)
 - eNumber, Name, [email](mailto:name@email.com)
 
