@@ -20,18 +20,11 @@ def compute_metrics(labels, X_eval, y_true):
     # Handle cases where all samples are mapped to one cluster
     n_unique = len(np.unique(labels))
     ss_cos = _s(silhouette_score, X_eval, labels, metric="cosine", random_state=42) if n_unique > 1 else None
-    ch_score = _s(calinski_harabasz_score, X_eval, labels) if n_unique > 1 else None
-    db_score = _s(davies_bouldin_score, X_eval, labels) if n_unique > 1 else None
 
     return {
         "NMI": _s(normalized_mutual_info_score, y_true, labels),
         "ARI": _s(adjusted_rand_score, y_true, labels),
         "Silhouette_cosine": ss_cos,
-        "Homogeneity": _s(homogeneity_score, y_true, labels),
-        "Completeness": _s(completeness_score, y_true, labels),
-        "V_measure": _s(v_measure_score, y_true, labels),
-        "Calinski_Harabasz": ch_score,
-        "Davies_Bouldin": db_score,
     }
 
 class DMoNNet(torch.nn.Module):
@@ -47,7 +40,7 @@ class DMoNNet(torch.nn.Module):
         x = torch.relu(self.conv2(x, edge_index, edge_weight))
         x_dense = x.unsqueeze(0)
         # to_dense_adj returns (batch, N, N)
-        adj_dense = to_dense_adj(edge_index, edge_attr=edge_weight).unsqueeze(0)
+        adj_dense = to_dense_adj(edge_index, edge_attr=edge_weight)
         _, _, _, _, pool_loss, ortho_loss = self.pool(x_dense, adj_dense)
         return pool_loss + ortho_loss
         
@@ -56,7 +49,7 @@ class DMoNNet(torch.nn.Module):
             x = torch.relu(self.conv1(x, edge_index, edge_weight))
             x = torch.relu(self.conv2(x, edge_index, edge_weight))
             x_dense = x.unsqueeze(0)
-            adj_dense = to_dense_adj(edge_index, edge_attr=edge_weight).unsqueeze(0)
+            adj_dense = to_dense_adj(edge_index, edge_attr=edge_weight)
             s, _, _, _, _, _ = self.pool(x_dense, adj_dense)
             return s.squeeze(0).argmax(dim=-1).cpu().numpy()
 
@@ -71,8 +64,9 @@ class MinCutNet(torch.nn.Module):
         x = torch.relu(self.conv1(x, edge_index, edge_weight))
         x = torch.relu(self.conv2(x, edge_index, edge_weight))
         s = self.pool_lin(x)
+        s = torch.softmax(s, dim=-1)  # Fix: apply softmax to assignment matrix
         x_dense = x.unsqueeze(0)
-        adj_dense = to_dense_adj(edge_index, edge_attr=edge_weight).unsqueeze(0)
+        adj_dense = to_dense_adj(edge_index, edge_attr=edge_weight)
         s_dense = s.unsqueeze(0)
         # returns x, adj, mincut_loss, ortho_loss (4 elements in dense mincut pool)
         out = dense_mincut_pool(x_dense, adj_dense, s_dense)
@@ -147,22 +141,6 @@ def main():
     labels_knn_mincut = train_unsupervised(model, knn_data, epochs=80)
     metrics_knn_mincut = compute_metrics(labels_knn_mincut, X_clr, y_true)
     experiments.append(("KNN+MinCutPool", metrics_knn_mincut))
-
-    # Exp 3: Bipartite + DMoN
-    print("Running Bipartite + DMoN...")
-    model = DMoNNet(in_channels=bip_data.num_features, hidden_channels=hidden_dim, num_clusters=num_clusters)
-    labels_bip_all = train_unsupervised(model, bip_data, epochs=80)
-    labels_bip_samples = labels_bip_all[:n_sample_nodes] # Only evaluate the sample nodes
-    metrics_bip_dmon = compute_metrics(labels_bip_samples, X_clr, y_true)
-    experiments.append(("Bipartite+DMoN", metrics_bip_dmon))
-
-    # Exp 4: Bipartite + MinCutPool
-    print("Running Bipartite + MinCutPool...")
-    model = MinCutNet(in_channels=bip_data.num_features, hidden_channels=hidden_dim, num_clusters=num_clusters)
-    labels_bip_all = train_unsupervised(model, bip_data, epochs=80)
-    labels_bip_samples = labels_bip_all[:n_sample_nodes]
-    metrics_bip_mincut = compute_metrics(labels_bip_samples, X_clr, y_true)
-    experiments.append(("Bipartite+MinCutPool", metrics_bip_mincut))
 
     print("\n" + "="*60)
     print("RESULTS SUMMARY")

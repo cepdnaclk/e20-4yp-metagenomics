@@ -68,29 +68,12 @@ CONFIG = {
     "sil_sample"       : 2000,
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
-# GNN RESULTS — paste your actual scores here after running your GNN scripts
-# ─────────────────────────────────────────────────────────────────────────────
 GNN_RESULTS = {
     "KNN+DMoN": {
         "NMI": 0.1818, "ARI": 0.0275, "Silhouette_cosine": 0.5509,
-        "Homogeneity": None, "Completeness": None, "V_measure": None,
-        "Calinski_Harabasz": None, "Davies_Bouldin": None,
     },
     "KNN+MinCutPool": {
         "NMI": None, "ARI": None, "Silhouette_cosine": None,
-        "Homogeneity": None, "Completeness": None, "V_measure": None,
-        "Calinski_Harabasz": None, "Davies_Bouldin": None,
-    },
-    "Bipartite+DMoN": {
-        "NMI": None, "ARI": None, "Silhouette_cosine": None,
-        "Homogeneity": None, "Completeness": None, "V_measure": None,
-        "Calinski_Harabasz": None, "Davies_Bouldin": None,
-    },
-    "Bipartite+MinCutPool": {
-        "NMI": None, "ARI": None, "Silhouette_cosine": None,
-        "Homogeneity": None, "Completeness": None, "V_measure": None,
-        "Calinski_Harabasz": None, "Davies_Bouldin": None,
     },
 }
 
@@ -210,26 +193,18 @@ def run_kmeans_all(embeddings, X_clr, X_pca, n_clusters, cfg):
 # MODULE 3 — COMPUTE ALL CLUSTERING METRICS
 # ─────────────────────────────────────────────────────────────────────────────
 def compute_metrics(labels, X_eval, y_true, name, sil_size=2000):
-    """Compute 8 clustering metrics. X_eval used for Silhouette/CH/DB."""
+    """Compute 3 clustering metrics."""
     def _s(fn, *a, **kw):
         try: return fn(*a, **kw)
         except: return np.nan
 
     ss_cos = _s(silhouette_score, X_eval, labels, metric="cosine",
                 sample_size=min(sil_size, len(labels)), random_state=42)
-    ss_euc = _s(silhouette_score, X_eval, labels, metric="euclidean",
-                sample_size=min(sil_size, len(labels)), random_state=42)
     return {
         "Method"             : name,
         "NMI"                : _s(normalized_mutual_info_score, y_true, labels),
         "ARI"                : _s(adjusted_rand_score, y_true, labels),
         "Silhouette_cosine"  : ss_cos,
-        "Silhouette_euclid"  : ss_euc,
-        "Homogeneity"        : _s(homogeneity_score, y_true, labels),
-        "Completeness"       : _s(completeness_score, y_true, labels),
-        "V_measure"          : _s(v_measure_score, y_true, labels),
-        "Calinski_Harabasz"  : _s(calinski_harabasz_score, X_eval, labels),
-        "Davies_Bouldin"     : _s(davies_bouldin_score, X_eval, labels),
     }
 
 def build_full_metrics_table(km_results, X_clr, y_true, cfg):
@@ -448,8 +423,8 @@ def fig_dr_metrics_heatmap(dr_df, out_dir):
 # ─────────────────────────────────────────────────────────────────────────────
 def fig_clustering_metric_bars(metrics_df, out_dir):
     _sec("FIGURE 5 — Clustering metric bars (all methods)")
-    metrics_to_show = ["NMI","ARI","Silhouette_cosine","Homogeneity","Completeness","V_measure"]
-    nice_names      = ["NMI","ARI","Silhouette\n(cosine)","Homogeneity","Completeness","V-measure"]
+    metrics_to_show = ["NMI","ARI","Silhouette_cosine"]
+    nice_names      = ["NMI","ARI","Silhouette\n(cosine)"]
 
     n_meth = len(metrics_df)
     # Colour: GNN methods get their fixed colour, KMeans gets DR colour
@@ -510,8 +485,8 @@ def fig_clustering_metric_bars(metrics_df, out_dir):
 # ─────────────────────────────────────────────────────────────────────────────
 def fig_radar(metrics_df, out_dir):
     _sec("FIGURE 6 — Radar chart")
-    radar_metrics = ["NMI","ARI","Silhouette_cosine","Homogeneity","Completeness","V_measure"]
-    radar_labels  = ["NMI","ARI","Silhouette","Homogeneity","Completeness","V-measure"]
+    radar_metrics = ["NMI","ARI","Silhouette_cosine"]
+    radar_labels  = ["NMI","ARI","Silhouette"]
     N = len(radar_metrics)
     angles = np.linspace(0, 2*np.pi, N, endpoint=False).tolist()
     angles += angles[:1]
@@ -918,15 +893,20 @@ def save_reports(metrics_df, dr_df, stability_nmi, stability_ari,
     md  = f"# Microbiome clustering — full evaluation report\n\n"
     md += f"## Best method by NMI: **{best_row['Method']}**  NMI={fv(best_row['NMI']):.4f}\n\n"
     md += "## All methods — clustering metrics\n\n"
-    cols = ["Method","NMI","ARI","Silhouette_cosine","Homogeneity",
-            "Completeness","V_measure","Calinski_Harabasz","Davies_Bouldin"]
+    cols = ["Method", "NMI", "ARI", "Silhouette_cosine"]
     md += "| " + " | ".join(cols) + " |\n"
     md += "| " + " | ".join(["---"]*len(cols)) + " |\n"
     for _, row in metrics_df.iterrows():
         vals = []
         for c in cols:
-            v = fv(row.get(c))
-            vals.append(f"{v:.4f}" if not np.isnan(v) else "—")
+            v = row.get(c)
+            # Safe format: if it's a number and not NaN, format it
+            if isinstance(v, (int, float, np.float32, np.float64)) and not pd.isna(v):
+                vals.append(f"{float(v):.4f}")
+            elif v is None or pd.isna(v):
+                vals.append("—")
+            else:
+                vals.append(str(v))
         md += "| " + " | ".join(vals) + " |\n"
 
     md += f"\n## K-Means stability  ({len(stability_nmi)} seeds)\n"

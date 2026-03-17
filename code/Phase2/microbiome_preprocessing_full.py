@@ -245,9 +245,8 @@ def run_all_dr_methods(X_clr, X_orig, cfg):
     # ── t-SNE ─────────────────────────────────────────────────────────────────
     _log("t-SNE", "running...")
     try:
-        perp = min(cfg["tsne_perplexity"], max(5, len(X_clr)-1))
-        tsne = TSNE(n_components=2, random_state=42, perplexity=perp,
-                    learning_rate="auto", init="pca", n_jobs=-1)
+        perplexity = min(30, max(5, len(X_clr) - 1))
+        tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity)
         embeddings["t-SNE"] = tsne.fit_transform(X_clr)
         _log("t-SNE", f"done {embeddings['t-SNE'].shape}")
     except Exception as e:
@@ -257,10 +256,8 @@ def run_all_dr_methods(X_clr, X_orig, cfg):
     _log("UMAP", "running...")
     try:
         import umap as umap_lib
-        nn = min(cfg["umap_n_neighbors"], max(2, len(X_clr)-1))
-        reducer = umap_lib.UMAP(n_components=2, random_state=42,
-                                n_neighbors=nn, min_dist=cfg["umap_min_dist"],
-                                metric="cosine")
+        n_neighbors = min(15, max(2, len(X_clr) - 1))
+        reducer = umap_lib.UMAP(n_components=2, random_state=42, n_neighbors=n_neighbors)
         embeddings["UMAP"] = reducer.fit_transform(X_clr)
         _log("UMAP", f"done {embeddings['UMAP'].shape}")
     except Exception as e:
@@ -270,8 +267,8 @@ def run_all_dr_methods(X_clr, X_orig, cfg):
     _log("PaCMAP", "running...")
     try:
         import pacmap
-        nn = min(15, max(2, len(X_clr)-1))
-        reducer = pacmap.PaCMAP(n_components=2, n_neighbors=nn, random_state=42)
+        n_neighbors = min(15, max(2, len(X_clr) - 1))
+        reducer = pacmap.PaCMAP(n_components=2, n_neighbors=n_neighbors, random_state=42)
         embeddings["PaCMAP"] = reducer.fit_transform(X_clr)
         _log("PaCMAP", f"done {embeddings['PaCMAP'].shape}")
     except Exception as e:
@@ -335,6 +332,21 @@ def build_knn_graph(X_pca_dmon, k=10, mutual=True, metric="cosine"):
 
     edge_index = np.stack([src, tgt], axis=0)
     _log("edge_index",  f"{edge_index.shape}  avg_deg={edge_index.shape[1]/n:.1f}")
+    
+    # Export as GEXF
+    try:
+        import networkx as nx
+        G = nx.Graph() if mutual else nx.DiGraph()
+        G.add_nodes_from(range(n))     
+        edges_with_attr = [(int(s), int(t), {'weight': float(w)}) for s, t, w in zip(src, tgt, wts)]
+        G.add_edges_from(edges_with_attr)
+        os.makedirs(CONFIG["output_dir"], exist_ok=True)
+        gexf_path = os.path.join(CONFIG["output_dir"], "knn_cosine_graph.gexf")
+        nx.write_gexf(G, gexf_path)
+        _log("GEXF saved", gexf_path)
+    except Exception as e:
+        _log("GEXF save FAILED", str(e))
+
     return edge_index, wts
 
 
