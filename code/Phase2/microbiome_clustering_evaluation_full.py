@@ -123,8 +123,13 @@ def style_ax(ax, title="", xlabel="", ylabel=""):
     if title: ax.set_title(title, color=TEXT, fontsize=8, fontweight="bold", pad=6)
 
 def fv(v):
-    """Format value — return float or nan-safe string."""
-    return float(v) if v is not None and str(v) not in ("None","nan","") else np.nan
+    """Format value — return float or string if not castable."""
+    if v is None or str(v) in ("None","nan",""):
+        return np.nan
+    try:
+        return float(v)
+    except ValueError:
+        return v
 
 # ─────────────────────────────────────────────────────────────────────────────
 # MODULE 1 — LOAD DATA
@@ -230,6 +235,16 @@ def compute_metrics(labels, X_eval, y_true, name, sil_size=2000):
 def build_full_metrics_table(km_results, X_clr, y_true, cfg):
     _sec("MODULE 3 — Full metrics table")
     rows = []
+
+    import json
+    import os
+    json_path = f"{cfg['preprocessed_dir']}/gnn_results.json"
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, "r") as f:
+                GNN_RESULTS.update(json.load(f))
+        except Exception as e:
+            _log("WARNING", f"Could not load GNN results: {e}")
 
     # K-Means variants
     for space_name, res in km_results.items():

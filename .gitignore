@@ -1,0 +1,32 @@
+# Environments
+venv/
+env/
+.env/
+venv.bak/
+env.bak/
+.venv/
+.conda/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac OS
+.DS_Store
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Directories potentially created by pandas/numpy outputs if not specified
+# preprocessed/
+# evaluation/
+# *.csv
+# *.npy
+# *.json
+# !abundance.csv
+!sysco_schedule.csv

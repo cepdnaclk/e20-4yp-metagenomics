@@ -247,8 +247,7 @@ def run_all_dr_methods(X_clr, X_orig, cfg):
     try:
         perp = min(cfg["tsne_perplexity"], max(5, len(X_clr)-1))
         tsne = TSNE(n_components=2, random_state=42, perplexity=perp,
-                    learning_rate="auto", init="pca",
-                    n_iter=cfg["tsne_n_iter"], n_jobs=-1)
+                    learning_rate="auto", init="pca", n_jobs=-1)
         embeddings["t-SNE"] = tsne.fit_transform(X_clr)
         _log("t-SNE", f"done {embeddings['t-SNE'].shape}")
     except Exception as e:
