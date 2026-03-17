@@ -1,4 +1,5 @@
 {
+    "title": "Data Driven Methods For Comparative Metagenomics",
     "team": [
         {
             "name": "Jananga T.G.C.",
@@ -37,5 +38,12 @@
             "url": "#"
         }
     ],
-    "tags": ["Final Year Projects"]
+    "tags": [
+        "Final Year Projects",
+        "Metagenomics",
+        "Machine Learning",
+        "Dimensionality Reduction",
+        "Graph Neural Networks",
+        "Bioinformatics"
+    ]
 }

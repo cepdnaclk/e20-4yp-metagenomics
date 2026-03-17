@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data-Driven Metagenomics | Topology-Aware DR &amp; GNN Clustering</title>
+  <meta name="description" content="Comparative evaluation of 8 dimensionality reduction methods and graph neural network clustering for high-dimensional, sparse, compositional metagenomic data." />
+  <meta name="keywords" content="metagenomics, dimensionality reduction, GNN, clustering, bioinformatics, machine learning" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================== Navigation ============================== -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-content">
+      <a href="#" class="nav-logo">MetaGenomics</a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#about">About</a></li>
+        <li><a href="#phases">Research Phases</a></li>
+        <li><a href="#methodology">Methodology</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#tech">Tech Stack</a></li>
+        <li><a href="#team">Team</a></li>
+        <li><a href="#publications">Publications</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">☰</button>
+    </div>
+  </nav>
+
+  <!-- ============================== Hero ============================== -->
+  <section class="hero" id="hero">
+    <div class="hero-orb"></div>
+    <div class="hero-orb"></div>
+    <div class="hero-orb"></div>
+
+    <div class="hero-content">
+      <div class="hero-badge">🧬 Final Year Project — University of Peradeniya</div>
+      <h1>
+        Data-Driven Methods For<br />
+        <span class="gradient-text">Comparative Metagenomics</span>
+      </h1>
+      <p class="hero-description">
+        Systematic benchmarking of dimensionality reduction techniques and GNN-based clustering
+        specifically optimized for high-dimensional, sparse, compositional metagenomic data.
+      </p>
+      <div class="hero-buttons">
+        <a href="https://github.com/cepdnaclk/e20-4yp-metagenomics" target="_blank" class="btn btn-primary">
+          ⭐ View Repository
+        </a>
+        <a href="#about" class="btn btn-outline">
+          Learn More ↓
+        </a>
+      </div>
+    </div>
+
+    <div class="scroll-indicator">
+      <span></span>
+    </div>
+  </section>
+
+  <!-- ============================== About / Abstract ============================== -->
+  <section class="section" id="about">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">Overview</span>
+        <h2 class="section-title">Project Abstract</h2>
+        <p class="section-subtitle">Bridging the gap in metagenomics analysis through data-driven methods</p>
+      </div>
+
+      <div class="about-card reveal">
+        <p class="about-text">
+          Metagenomic studies generate high-dimensional, sparse, and compositional datasets that challenge traditional
+          analytical methods. This project systematically benchmarks <strong>8 dimensionality reduction (DR) methods</strong>
+          across <strong>3 diverse metagenomic datasets</strong> and validates <strong>Graph Neural Network (GNN)</strong>
+          architectures for unsupervised microbial community clustering. Our goal is to provide evidence-based recommendations
+          for the metagenomics community and develop a unified preprocessing-to-evaluation pipeline.
+        </p>
+
+        <div class="challenge-tags">
+          <span class="challenge-tag">⚡ Extreme Sparsity (90–99% zeros)</span>
+          <span class="challenge-tag">🔗 Compositionality Constraints</span>
+          <span class="challenge-tag">🌿 Phylogenetic Structure</span>
+        </div>
+
+        <div class="about-grid">
+          <div class="about-stat">
+            <div class="stat-value">8</div>
+            <div class="stat-label">DR Methods Compared</div>
+          </div>
+          <div class="about-stat">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Diverse Datasets</div>
+          </div>
+          <div class="about-stat">
+            <div class="stat-value">24+</div>
+            <div class="stat-label">Visualizations Generated</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== Research Phases ============================== -->
+  <section class="section" id="phases">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">Research</span>
+        <h2 class="section-title">Research Phases</h2>
+        <p class="section-subtitle">A two-phase approach to comparative metagenomics analysis</p>
+      </div>
+
+      <div class="phases-grid">
+        <!-- Phase 1 -->
+        <div class="phase-card phase-1 reveal reveal-delay-1">
+          <div class="phase-number">Phase 1</div>
+          <h3>📊 DR Benchmarking</h3>
+          <span class="phase-status status-completed">✓ Completed</span>
+          <ul class="phase-detail-list">
+            <li><strong>Datasets:</strong> Human (3.6K samples), Soil (423 samples), Marine (1.2K samples)</li>
+            <li><strong>Methods:</strong> PCA, UniFrac PCoA, MDS, t-SNE, UMAP, PaCMAP, PHATE, SONG</li>
+            <li><strong>Metrics:</strong> Trustworthiness, Continuity, UniFrac/Bray-Curtis/Aitchison correlations</li>
+            <li><strong>Finding:</strong> No universal best method — performance is dataset & metric dependent</li>
+          </ul>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="phase-card phase-2 reveal reveal-delay-2">
+          <div class="phase-number">Phase 2</div>
+          <h3>🔬 GNN Clustering</h3>
+          <span class="phase-status status-progress">◉ In Progress</span>
+          <ul class="phase-detail-list">
+            <li><strong>Graphs:</strong> k-NN from DR embeddings with hard/soft edges</li>
+            <li><strong>Architectures:</strong> DMoN, MinCutPool, GCN+GAT + k-means</li>
+            <li><strong>Evaluation:</strong> NMI, ARI, Silhouette score, Modularity</li>
+            <li><strong>Goal:</strong> Validate GNN clustering vs. traditional methods</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== Methodology ============================== -->
+  <section class="section" id="methodology">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">Methodology</span>
+        <h2 class="section-title">Research Pipeline</h2>
+        <p class="section-subtitle">End-to-end workflow from raw data to actionable insights</p>
+      </div>
+
+      <div class="pipeline">
+        <div class="pipeline-step reveal reveal-delay-1">
+          <div class="step-icon blue">🧹</div>
+          <h4>Preprocessing</h4>
+          <p>nzCLR transformation &amp; UniFrac distance computation to handle compositionality</p>
+        </div>
+        <div class="pipeline-step reveal reveal-delay-2">
+          <div class="step-icon purple">📐</div>
+          <h4>Dimensionality Reduction</h4>
+          <p>8 methods benchmarked: PCA, PCoA, MDS, t-SNE, UMAP, PaCMAP, PHATE, SONG</p>
+        </div>
+        <div class="pipeline-step reveal reveal-delay-3">
+          <div class="step-icon cyan">🕸️</div>
+          <h4>GNN Clustering</h4>
+          <p>k-NN graph construction &amp; GNN architectures (DMoN, MinCutPool, GCN+GAT)</p>
+        </div>
+        <div class="pipeline-step reveal reveal-delay-4">
+          <div class="step-icon emerald">📈</div>
+          <h4>Evaluation</h4>
+          <p>Trustworthiness, Continuity, NMI, ARI, Silhouette, &amp; correlation metrics</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== Results ============================== -->
+  <section class="section" id="results">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">Findings</span>
+        <h2 class="section-title">Key Results</h2>
+        <p class="section-subtitle">Highlights from Phase 1 DR benchmarking</p>
+      </div>
+
+      <div class="results-grid reveal">
+        <div class="result-card">
+          <div class="result-value">0.927</div>
+          <div class="result-label">Trustworthiness</div>
+          <div class="result-detail">Best: SONG method</div>
+        </div>
+        <div class="result-card">
+          <div class="result-value">0.999</div>
+          <div class="result-label">UniFrac Correlation</div>
+          <div class="result-detail">Best: PCoA method</div>
+        </div>
+        <div class="result-card">
+          <div class="result-value">24</div>
+          <div class="result-label">Visualizations</div>
+          <div class="result-detail">3 datasets × 8 methods</div>
+        </div>
+      </div>
+
+      <div class="results-summary reveal">
+        <h4>💡 Key Insights</h4>
+        <ul>
+          <li>No single dimensionality reduction method universally outperforms all others across every dataset and metric</li>
+          <li>UniFrac PCoA excels at preserving phylogenetic distance structure (correlation up to 0.999)</li>
+          <li>PaCMAP and SONG achieve the best balance between local and global structure preservation</li>
+          <li>Preliminary rankings established by structure preservation capabilities across all three datasets</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== Tech Stack ============================== -->
+  <section class="section" id="tech">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">Technology</span>
+        <h2 class="section-title">Tech Stack</h2>
+        <p class="section-subtitle">Tools and frameworks powering our research</p>
+      </div>
+
+      <div class="tech-grid">
+        <div class="tech-category reveal reveal-delay-1">
+          <h4>🧹 Preprocessing</h4>
+          <ul class="tech-list">
+            <li>nzCLR Transformation</li>
+            <li>UniFrac Distances</li>
+            <li>Bray-Curtis / Aitchison</li>
+          </ul>
+        </div>
+        <div class="tech-category reveal reveal-delay-2">
+          <h4>📐 Dim. Reduction</h4>
+          <ul class="tech-list">
+            <li>scikit-learn</li>
+            <li>umap-learn</li>
+            <li>PaCMAP / PHATE / SONG</li>
+          </ul>
+        </div>
+        <div class="tech-category reveal reveal-delay-3">
+          <h4>🕸️ GNN Frameworks</h4>
+          <ul class="tech-list">
+            <li>PyTorch Geometric</li>
+            <li>DGL</li>
+            <li>DMoN / MinCutPool</li>
+          </ul>
+        </div>
+        <div class="tech-category reveal reveal-delay-4">
+          <h4>📊 Visualization</h4>
+          <ul class="tech-list">
+            <li>Matplotlib</li>
+            <li>Seaborn</li>
+            <li>Plotly</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== Team & Supervisors ============================== -->
+  <section class="section" id="team">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">People</span>
+        <h2 class="section-title">Team &amp; Supervisors</h2>
+        <p class="section-subtitle">Department of Computer Engineering, University of Peradeniya</p>
+      </div>
+
+      <!-- Team Members -->
+      <div class="team-grid reveal">
+        <div class="team-card">
+          <div class="team-avatar">CJ</div>
+          <h4>Jananga T.G.C.</h4>
+          <div class="team-id">E/20/158</div>
+          <a href="mailto:e20158@eng.pdn.ac.lk" class="team-email">✉ e20158@eng.pdn.ac.lk</a>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">TP</div>
+          <h4>Prasadinie H.A.M.T</h4>
+          <div class="team-id">E/20/300</div>
+          <a href="mailto:e20300@eng.pdn.ac.lk" class="team-email">✉ e20300@eng.pdn.ac.lk</a>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">PM</div>
+          <h4>Malshan P.G.P.</h4>
+          <div class="team-id">E/20/244</div>
+          <a href="mailto:e20244@eng.pdn.ac.lk" class="team-email">✉ e20244@eng.pdn.ac.lk</a>
+        </div>
+      </div>
+
+      <!-- Supervisors -->
+      <div class="section-header reveal" style="margin-top: 2rem;">
+        <span class="section-label">Supervisors</span>
+      </div>
+
+      <div class="supervisors-grid reveal">
+        <div class="supervisor-card">
+          <div class="sup-icon">🎓</div>
+          <h4>Dr. Damayanthi Herath</h4>
+          <a href="mailto:damayanthiherath@eng.pdn.ac.lk" class="sup-email">damayanthiherath@eng.pdn.ac.lk</a>
+        </div>
+        <div class="supervisor-card">
+          <div class="sup-icon">🎓</div>
+          <h4>Dr. Rajith Vidanaarachchi</h4>
+          <a href="mailto:rajith.v@unimelb.edu.au" class="sup-email">rajith.v@unimelb.edu.au</a>
+        </div>
+        <div class="supervisor-card">
+          <div class="sup-icon">🎓</div>
+          <h4>Dr. Vijini Mallawaarachchi</h4>
+          <a href="mailto:vijini.mallawaarachchi@flinders.edu.au" class="sup-email">vijini.mallawaarachchi@flinders.edu.au</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== Publications ============================== -->
+  <section class="section" id="publications">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">Publications</span>
+        <h2 class="section-title">Reports &amp; Papers</h2>
+        <p class="section-subtitle">Academic deliverables and research outputs</p>
+      </div>
+
+      <div class="publications-list reveal">
+        <div class="pub-item">
+          <div class="pub-icon">📄</div>
+          <div>
+            <h4>Semester 7 Report</h4>
+            <p>Phase 1 DR Benchmarking — methodology, experiments, and initial findings</p>
+          </div>
+        </div>
+        <div class="pub-item">
+          <div class="pub-icon">📊</div>
+          <div>
+            <h4>Semester 7 Slides</h4>
+            <p>Presentation covering research motivation, approach, and Phase 1 results</p>
+          </div>
+        </div>
+        <div class="pub-item">
+          <div class="pub-icon">📄</div>
+          <div>
+            <h4>Semester 8 Report</h4>
+            <p>Phase 2 GNN Clustering — coming soon</p>
+          </div>
+        </div>
+        <div class="pub-item">
+          <div class="pub-icon">📊</div>
+          <div>
+            <h4>Semester 8 Slides</h4>
+            <p>Final presentation — coming soon</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== Footer ============================== -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        MetaGenomics<br />
+        <span>© 2025 Department of Computer Engineering, University of Peradeniya</span>
+      </div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/cepdnaclk/e20-4yp-metagenomics" target="_blank">GitHub Repository</a></li>
+        <li><a href="http://www.ce.pdn.ac.lk/" target="_blank">Department of CE</a></li>
+        <li><a href="https://eng.pdn.ac.lk/" target="_blank">University of Peradeniya</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- ============================== Scripts ============================== -->
+  <script>
+    // Navbar scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Mobile nav toggle
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+      navToggle.textContent = navLinks.classList.contains('active') ? '✕' : '☰';
+    });
+
+    // Close mobile nav on link click
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+        navToggle.textContent = '☰';
+      });
+    });
+
+    // Scroll reveal with Intersection Observer
+    const revealElements = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    revealElements.forEach(el => observer.observe(el));
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

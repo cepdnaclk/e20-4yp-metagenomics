@@ -1,9 +1,9 @@
 # This theme is based on https://github.com/jekyll/minima
 # Please refer above link to know the available configurations
 
-title: ""
+title: "Data Driven Methods For Comparative Metagenomics"
 remote_theme: cepdnaclk/eYY-project-theme
-description: ""
+description: "Systematic benchmarking of dimensionality reduction techniques and GNN-based clustering for high-dimensional metagenomic data."
 markdown: kramdown
 
 kramdown:
