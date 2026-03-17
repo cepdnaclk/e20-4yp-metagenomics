@@ -75,22 +75,24 @@ GNN_RESULTS = {
     "KNN+MinCutPool": {
         "NMI": None, "ARI": None, "Silhouette_cosine": None,
     },
+    # Bipartite methods have been intentionally removed from evaluation
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PALETTE & STYLE
 # ─────────────────────────────────────────────────────────────────────────────
-DARK  = "#0d0d1a"; PANEL = "#13132b"; GRID = "#2a2a4a"
-TEXT  = "#e8e8ff"; TEXT2 = "#9090c0"
-PAL   = ["#00d4ff","#ff6b6b","#ffd700","#b388ff","#69ff85","#ff9f43",
-         "#fd79a8","#a29bfe","#55efc4","#fdcb6e","#e17055","#74b9ff",
-         "#00cec9","#6c5ce7","#fab1a0","#dfe6e9","#2d3436","#636e72"]
-# Fixed colours per method family
-GNN_COLORS = {"KNN+DMoN":"#ff6b6b","KNN+MinCutPool":"#fd79a8",
-              "Bipartite+DMoN":"#b388ff","Bipartite+MinCutPool":"#a29bfe"}
-DR_COLORS  = {"PCA":"#00d4ff","Jaccard PCoA":"#69ff85","MDS":"#ffd700",
-              "t-SNE":"#ff9f43","UMAP":"#55efc4","PaCMAP":"#74b9ff",
-              "PHATE":"#00cec9","SONG":"#e17055"}
+# ── Light / white-background colour scheme ───────────────────────────────────
+DARK  = "#ffffff"; PANEL = "#f5f5f5"; GRID = "#d0d0d0"
+TEXT  = "#111111"; TEXT2 = "#555555"
+PAL   = ["#1f77b4","#d62728","#2ca02c","#9467bd","#8c564b",
+         "#e377c2","#7f7f7f","#bcbd22","#17becf","#ff7f0e",
+         "#aec7e8","#ffbb78","#98df8a","#ff9896","#c5b0d5",
+         "#c49c94","#f7b6d2","#dbdb8d"]
+# Fixed colours per method family (Bipartite methods removed)
+GNN_COLORS = {"KNN+DMoN":"#d62728","KNN+MinCutPool":"#e377c2"}
+DR_COLORS  = {"PCA":"#1f77b4","Jaccard PCoA":"#2ca02c","MDS":"#ff7f0e",
+              "t-SNE":"#9467bd","UMAP":"#8c564b","PaCMAP":"#17becf",
+              "PHATE":"#bcbd22","SONG":"#7f7f7f"}
 
 def _sec(t): print(f"\n{'═'*64}\n  {t}\n{'═'*64}")
 def _log(t, m): print(f"  [{t}]{'─'*max(52-len(t),1)} {m}")
@@ -101,7 +103,7 @@ def style_ax(ax, title="", xlabel="", ylabel=""):
     ax.tick_params(colors=TEXT, labelsize=7)
     if xlabel: ax.set_xlabel(xlabel, color=TEXT2, fontsize=8)
     if ylabel: ax.set_ylabel(ylabel, color=TEXT2, fontsize=8)
-    ax.grid(True, color=GRID, linestyle="--", alpha=0.4)
+    ax.grid(True, color=GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     if title: ax.set_title(title, color=TEXT, fontsize=8, fontweight="bold", pad=6)
 
@@ -121,8 +123,7 @@ def load_data(cfg):
     _sec("MODULE 1 — Load preprocessed data")
     d = cfg["preprocessed_dir"]
 
-    X_clr  = pd.read_csv(f"{d}/X_clr.csv",        index_col=0).values.astype(np.float32)
-    X_pca  = pd.read_csv(f"{d}/X_pca_kmeans.csv",  index_col=0).values.astype(np.float32)
+    X_clr  = pd.read_csv(f"{d}/X_clr.csv", index_col=0).values.astype(np.float32)
     y_true = np.load(f"{d}/y_true.npy")
 
     # Load embeddings
@@ -145,14 +146,12 @@ def load_data(cfg):
              if os.path.exists(dr_metrics_path) else pd.DataFrame())
 
     # Load the cleaned disease labels saved by the preprocessing script
-    # This guarantees the label encoder matches y_true exactly (no noise classes)
     _NOISE = {"nd", "na", "-", " -", "unknown_raw", "nan", "none", ""}
     dis_label_path = f"{d}/disease_labels.csv"
     if os.path.exists(dis_label_path):
         disease_series = pd.read_csv(dis_label_path).iloc[:, 0].astype(str).str.strip().str.lower()
         disease_series = disease_series.where(~disease_series.isin(_NOISE), other="unknown")
     else:
-        # Fallback: re-read and clean the same way preprocessing does
         df      = pd.read_csv(cfg["abundance_csv"], low_memory=False)
         meta    = df.iloc[:, :cfg["metadata_cols"]]
         dis_col = next(c for c in meta.columns if cfg["disease_col_kw"].lower() in c.lower())
@@ -163,20 +162,19 @@ def load_data(cfg):
     le.fit(disease_series)
 
     _log("X_clr",      f"{X_clr.shape}")
-    _log("X_pca",      f"{X_pca.shape}")
     _log("embeddings", str(list(embeddings.keys())))
     _log("classes",    f"{len(le.classes_)}: {list(le.classes_)}")
 
-    return X_clr, X_pca, y_true, le, embeddings, taxa_names, dr_df, disease_series
+    return X_clr, y_true, le, embeddings, taxa_names, dr_df, disease_series
 
 # ─────────────────────────────────────────────────────────────────────────────
 # MODULE 2 — K-MEANS ON EVERY DR EMBEDDING
 # ─────────────────────────────────────────────────────────────────────────────
-def run_kmeans_all(embeddings, X_clr, X_pca, n_clusters, cfg):
+def run_kmeans_all(embeddings, X_clr, n_clusters, cfg):
     _sec("MODULE 2 — K-Means on all DR embeddings")
     results = {}
-    spaces  = {"CLR": X_clr, "AitchisonPCA": X_pca}
-    spaces.update({f"KM_{k}": v for k,v in embeddings.items() if v is not None})
+    # Only run K-Means on DR embeddings (no direct CLR or AitchisonPCA)
+    spaces = {f"KM_{k}": v for k, v in embeddings.items() if v is not None}
 
     for space_name, X in spaces.items():
         if X is None: continue
@@ -532,7 +530,7 @@ def fig_radar(metrics_df, out_dir):
 # ─────────────────────────────────────────────────────────────────────────────
 def fig_overlap_heatmaps(km_results, y_true, le, out_dir):
     _sec("FIGURE 7 — Overlap heatmaps")
-    target_keys = ["CLR","AitchisonPCA"] + [k for k in km_results if k.startswith("KM_")]
+    target_keys = [k for k in km_results if k.startswith("KM_")]
     target_keys = target_keys[:4]   # show top 4 to keep figure readable
 
     n_show = len(target_keys)
@@ -585,9 +583,14 @@ def fig_overlap_heatmaps(km_results, y_true, le, out_dir):
 def fig_purity_comparison(km_results, y_true, le, out_dir):
     _sec("FIGURE 8 — Per-disease purity")
 
-    # Best K-Means by NMI (already computed externally) — use CLR
-    keys  = ["CLR"] + list(GNN_RESULTS.keys())[:4]
-    names = [f"KMeans (CLR)"] + list(GNN_RESULTS.keys())[:4]
+    # Use first available KM_ key
+    first_key = next((k for k in km_results if k.startswith("KM_")), None)
+    if first_key is None:
+        _log("WARNING", "No KM_ results found, skipping purity figure")
+        return
+    first_label = first_key[3:]   # strip "KM_" prefix
+    keys  = [first_key] + list(GNN_RESULTS.keys())[:4]
+    names = [f"KMeans ({first_label})"] + list(GNN_RESULTS.keys())[:4]
 
     fig, axes = plt.subplots(1, len(keys), figsize=(5*len(keys), 6), facecolor=DARK)
     if len(keys) == 1: axes = [axes]
@@ -706,7 +709,7 @@ def fig_stability(X_clr, n_clusters, y_true, cfg, out_dir):
 
     plt.tight_layout()
     path = f"{out_dir}/fig10_stability.png"
-    plt.savefig(path, dpi=150, bbox_inches="tight", facecolor=DARK)
+    plt.savefig(path, dpi=150, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     _log("saved", path)
     return nmi_v, ari_v, sil_v
@@ -725,7 +728,7 @@ def fig_taxa_heatmap(X_clr, km_labels, taxa_names, out_dir, top_n=30):
         index=[taxa_names[i] if i < len(taxa_names) else f"T{i}" for i in top_idx]
     )
     cmap = LinearSegmentedColormap.from_list("clr", ["#00d4ff","#13132b","#ff6b6b"], N=256)
-    fig, ax = plt.subplots(figsize=(13, 11), facecolor=DARK)
+    fig, ax = plt.subplots(figsize=(13, 11), facecolor="white")
     ax.set_facecolor(PANEL)
     sns.heatmap(heat_df, ax=ax, cmap=cmap, center=0,
                 linewidths=0.3, linecolor=GRID,
@@ -738,9 +741,80 @@ def fig_taxa_heatmap(X_clr, km_labels, taxa_names, out_dir, top_n=30):
     ax.collections[0].colorbar.ax.yaxis.label.set_color(TEXT)
     plt.tight_layout()
     path = f"{out_dir}/fig11_taxa_heatmap.png"
-    plt.savefig(path, dpi=150, bbox_inches="tight", facecolor=DARK)
+    plt.savefig(path, dpi=150, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     _log("saved", path)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FIGURE 13 — GNN CLUSTERS ON DR EMBEDDINGS
+# Shows KNN+DMoN and KNN+MinCutPool cluster assignments projected onto each
+# 2-D DR embedding — mirrors the DR+K-Means visualization in fig2.
+# Requires GNN labels to be loaded from preprocessed/gnn_labels.json (or
+# created by microbiome_gnn_clustering.py which saves gnn_results.json).
+# If label arrays are present in gnn_labels.json they are used; otherwise
+# the figure is skipped gracefully.
+# ─────────────────────────────────────────────────────────────────────────────
+def fig_gnn_on_dr_grid(embeddings, gnn_label_arrays, n_clusters, out_dir):
+    """
+    Visualise GNN cluster assignments across all DR 2-D embeddings.
+
+    Parameters
+    ----------
+    embeddings       : dict  {method_name → 2-D array}
+    gnn_label_arrays : dict  {gnn_name → 1-D int array of cluster labels}
+    n_clusters       : int
+    out_dir          : str
+    """
+    _sec("FIGURE 13 — GNN clusters on DR embeddings")
+
+    if not gnn_label_arrays:
+        _log("SKIP", "no GNN label arrays available — run microbiome_gnn_clustering.py first")
+        return
+
+    valid_embs = [(n, e) for n, e in embeddings.items() if e is not None]
+    if not valid_embs:
+        _log("SKIP", "no valid DR embeddings found")
+        return
+
+    n_gnn  = len(gnn_label_arrays)
+    n_embs = len(valid_embs)
+    n_cols = min(4, n_embs)
+    n_rows = (n_embs + n_cols - 1) // n_cols
+
+    for gnn_name, labels in gnn_label_arrays.items():
+        if labels is None:
+            _log(gnn_name, "labels are None — skipping")
+            continue
+
+        fig, axes = plt.subplots(n_rows, n_cols,
+                                 figsize=(5 * n_cols, 4.5 * n_rows),
+                                 facecolor=DARK)
+        axes = np.array(axes).flatten() if n_rows * n_cols > 1 else [axes]
+
+        for idx, (emb_name, emb) in enumerate(valid_embs):
+            ax = axes[idx]
+            style_ax(ax, f"{emb_name}", "Dim 1", "Dim 2")
+            unique_labels = np.unique(labels)
+            for cid in unique_labels:
+                mask = labels == cid
+                ax.scatter(emb[mask, 0], emb[mask, 1],
+                           c=[PAL[int(cid) % len(PAL)]],
+                           label=f"C{cid}", alpha=0.75, s=18, linewidths=0)
+            if idx == 0 and n_clusters <= 12:
+                ax.legend(fontsize=6, facecolor=PANEL, edgecolor=GRID,
+                          labelcolor=TEXT, markerscale=1.5, loc="best")
+
+        for i in range(n_embs, len(axes)):
+            axes[i].set_visible(False)
+
+        safe_name = gnn_name.replace("+", "_").replace(" ", "_")
+        fig.suptitle(f"{gnn_name} — cluster assignments projected on DR embeddings",
+                     color=TEXT, fontsize=12, fontweight="bold", y=1.01)
+        plt.tight_layout()
+        path = f"{out_dir}/fig13_{safe_name}_on_dr_grid.png"
+        plt.savefig(path, dpi=150, bbox_inches="tight", facecolor=DARK)
+        plt.close(fig)
+        _log("saved", path)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FIGURE 12 — MASTER DASHBOARD  (4×4 composite)
@@ -807,13 +881,15 @@ def fig_master_dashboard(embeddings, disease_series, km_results,
     ax_stab.set_xticks(seeds)
     ax_stab.legend(fontsize=7, facecolor=PANEL, edgecolor=GRID, labelcolor=TEXT)
 
-    # ── Row 2: Confusion heatmap (K-Means CLR) + Cluster sizes + purity ──────
+    # ── Row 2: Confusion heatmap (best DR KMeans) + Cluster sizes + purity ──────
+    _first_km = next((k for k in km_results if k.startswith("KM_")), list(km_results.keys())[0])
+    _first_km_label = _first_km.replace("KM_", "")
     ax_conf = fig.add_subplot(gs[2, 0:2])
-    cm_n    = confusion_matrix(y_true, km_results["CLR"]["labels"]).astype(float)
+    cm_n    = confusion_matrix(y_true, km_results[_first_km]["labels"]).astype(float)
     cm_n   /= (cm_n.sum(axis=1, keepdims=True) + 1e-8)
     im      = ax_conf.imshow(cm_n, aspect="auto", cmap="YlOrRd", vmin=0, vmax=1)
     ax_conf.set_facecolor(PANEL)
-    ax_conf.set_title("K-Means (CLR) — row-normalised overlap",
+    ax_conf.set_title(f"K-Means ({_first_km_label}) — row-normalised overlap",
                       color=TEXT, fontsize=9, fontweight="bold", pad=6)
     ax_conf.set_xlabel("Cluster", color=TEXT2, fontsize=8)
     ax_conf.set_ylabel("True disease", color=TEXT2, fontsize=8)
@@ -831,38 +907,40 @@ def fig_master_dashboard(embeddings, disease_series, km_results,
                          fontsize=6, fontweight="bold")
 
     ax_sz = fig.add_subplot(gs[2, 2])
-    style_ax(ax_sz, "Cluster sizes (CLR)", "Cluster", "# Samples")
-    ids, cnts = np.unique(km_results["CLR"]["labels"], return_counts=True)
+    style_ax(ax_sz, f"Cluster sizes ({_first_km_label})", "Cluster", "# Samples")
+    ids, cnts = np.unique(km_results[_first_km]["labels"], return_counts=True)
     ax_sz.bar(range(len(ids)), cnts,
               color=[PAL[i%len(PAL)] for i in ids],
-              edgecolor="white", linewidth=0.4)
+              edgecolor=GRID, linewidth=0.4)
     ax_sz.set_xticks(range(len(ids)))
     ax_sz.set_xticklabels([f"C{c}" for c in ids], fontsize=7, color=TEXT)
     for i, cnt in enumerate(cnts):
         ax_sz.text(i, cnt+2, str(cnt), ha="center", va="bottom",
-                   color="white", fontsize=7)
+                   color=TEXT, fontsize=7)
 
     ax_pur = fig.add_subplot(gs[2, 3])
-    style_ax(ax_pur, "Per-disease purity (CLR)", "", "Purity")
-    pur_df = purity_analysis(km_results["CLR"]["labels"], y_true, le, "CLR")
+    style_ax(ax_pur, f"Per-disease purity ({_first_km_label})", "", "Purity")
+    pur_df = purity_analysis(km_results[_first_km]["labels"], y_true, le, _first_km_label)
     ax_pur.bar(range(len(pur_df)), pur_df["Purity"].values,
                color=[PAL[i%len(PAL)] for i in range(len(pur_df))],
-               edgecolor="white", linewidth=0.4)
+               edgecolor=GRID, linewidth=0.4)
     ax_pur.set_xticks(range(len(pur_df)))
     ax_pur.set_xticklabels(pur_df["Disease"].values, rotation=40,
                            ha="right", fontsize=6, color=TEXT)
     ax_pur.set_ylim(0, 1.15)
     ax_pur.axhline(1/n_cls, color="#ffd700", linestyle="--", lw=1, alpha=0.7)
 
-    # Title
-    km_clr = metrics_df[metrics_df["Method"].str.contains("KMeans", regex=False)]
-    nmi_clr = fv(km_clr["NMI"].values[0]) if len(km_clr) else 0.0
-    ari_clr = fv(km_clr["ARI"].values[0]) if len(km_clr) else 0.0
+    # Title — show best DR KMeans and KNN+DMoN
+    best_km = metrics_df[metrics_df["Method"].str.startswith("KMeans")].sort_values("NMI", ascending=False)
+    nmi_best = fv(best_km["NMI"].values[0]) if len(best_km) else 0.0
+    ari_best = fv(best_km["ARI"].values[0]) if len(best_km) else 0.0
+    best_name = best_km["Method"].values[0] if len(best_km) else "KMeans"
+    gnn_dmon_nmi = fv(GNN_RESULTS.get("KNN+DMoN", {}).get("NMI", np.nan))
+    gnn_dmon_ari = fv(GNN_RESULTS.get("KNN+DMoN", {}).get("ARI", np.nan))
     fig.suptitle(
         f"Microbiome clustering — master dashboard  |  "
-        f"K-Means (CLR): NMI={nmi_clr:.4f}  ARI={ari_clr:.4f}  |  "
-        f"KNN+DMoN: NMI={GNN_RESULTS['KNN+DMoN']['NMI']:.4f}  "
-        f"ARI={GNN_RESULTS['KNN+DMoN']['ARI']:.4f}",
+        f"Best DR+KMeans: {best_name}  NMI={nmi_best:.4f}  ARI={ari_best:.4f}  |  "
+        + (f"KNN+DMoN: NMI={gnn_dmon_nmi:.4f}  ARI={gnn_dmon_ari:.4f}" if not np.isnan(gnn_dmon_nmi) else "KNN+DMoN: pending"),
         color=TEXT, fontsize=13, fontweight="bold", y=1.01,
     )
     plt.tight_layout()
@@ -950,11 +1028,11 @@ def run_evaluation(cfg=CONFIG):
     os.makedirs(out_dir, exist_ok=True)
 
     # 1 Load
-    X_clr, X_pca, y_true, le, embeddings, taxa_names, dr_df, disease_series = load_data(cfg)
+    X_clr, y_true, le, embeddings, taxa_names, dr_df, disease_series = load_data(cfg)
     n_cls = len(le.classes_)
 
-    # 2 K-Means on all spaces
-    km_results = run_kmeans_all(embeddings, X_clr, X_pca, n_cls, cfg)
+    # 2 K-Means on all DR spaces
+    km_results = run_kmeans_all(embeddings, X_clr, n_cls, cfg)
 
     # 3 Metrics table (K-Means + GNN)
     metrics_df = build_full_metrics_table(km_results, X_clr, y_true, cfg)
@@ -972,9 +1050,30 @@ def run_evaluation(cfg=CONFIG):
     fig_overlap_heatmaps(km_results, y_true, le, out_dir)
     fig_purity_comparison(km_results, y_true, le, out_dir)
     fig_cluster_sizes(km_results, y_true, le, out_dir)
-    fig_taxa_heatmap(X_clr, km_results["CLR"]["labels"], taxa_names, out_dir)
+    fig_taxa_heatmap(X_clr, km_results[list(km_results.keys())[0]]["labels"], taxa_names, out_dir)
     fig_master_dashboard(embeddings, disease_series, km_results,
                          metrics_df, y_true, le, stab_nmi, out_dir)
+
+    # 5b GNN cluster visualization on DR embeddings
+    _sec("FIGURE 13 — GNN clusters on DR embeddings")
+    gnn_labels_path = f"{cfg['preprocessed_dir']}/gnn_labels.json"
+    gnn_label_arrays = {}
+    import json as _json
+    if os.path.exists(gnn_labels_path):
+        try:
+            with open(gnn_labels_path, "r") as _f:
+                raw = _json.load(_f)
+            for gnn_name, label_list in raw.items():
+                if label_list is not None:
+                    gnn_label_arrays[gnn_name] = np.array(label_list, dtype=int)
+                else:
+                    gnn_label_arrays[gnn_name] = None
+        except Exception as _e:
+            _log("WARNING", f"Could not load gnn_labels.json: {_e}")
+    else:
+        _log("INFO", f"gnn_labels.json not found at {gnn_labels_path} — "
+             "run microbiome_gnn_clustering.py to generate GNN labels")
+    fig_gnn_on_dr_grid(embeddings, gnn_label_arrays, n_cls, out_dir)
 
     # 6 Reports
     save_reports(metrics_df, dr_df, stab_nmi, stab_ari, stab_sil, out_dir)
@@ -983,7 +1082,7 @@ def run_evaluation(cfg=CONFIG):
     _sec("EVALUATION COMPLETE")
     best = metrics_df.sort_values("NMI", ascending=False).iloc[0]
     print(f"\n  Best method by NMI : {best['Method']}  NMI={fv(best['NMI']):.4f}")
-    print(f"  K-Means (CLR) stability : σ_NMI={np.std(stab_nmi):.4f}")
+    print(f"  K-Means stability : σ_NMI={np.std(stab_nmi):.4f}")
     print(f"\n  {len(metrics_df)} methods evaluated")
     print(f"\n  Figures saved → {out_dir}/")
     for fname, desc in [
@@ -999,6 +1098,7 @@ def run_evaluation(cfg=CONFIG):
         ("fig10","Stability"),
         ("fig11","Taxa heatmap"),
         ("fig12","MASTER DASHBOARD"),
+        ("fig13","GNN clusters on DR embeddings (KNN+DMoN / KNN+MinCutPool)"),
     ]:
         print(f"    {fname}_*.png  — {desc}")
 
